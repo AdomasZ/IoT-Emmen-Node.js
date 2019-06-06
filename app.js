@@ -1,15 +1,17 @@
 const http = require('http');
 const mysql = require('mysql');
+const request = require('request')
 let sql;
 
 const con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "",//!d7NS`
+    password: "!d7NS`",
     database: "data"
 });
-var minutes = 60 * 3, the_interval = minutes * 60 * 1000;
+var hour = 1000 * 60 * 60, the_interval = hour * 3;
 setInterval(() => { fetch(); }, the_interval);
+
 http.createServer(function (req, res) {
 
     // Website you wish to allow to connect
@@ -24,16 +26,33 @@ http.createServer(function (req, res) {
     // Set to true if you need the website to include cookies in the requests sent
     // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
-    switch (req.url) {
+    if(req.url.includes('?device_id=')){
+    	let query = req.url.substr(req.url.indexOf('=')+1);
+    	// res.write(query);
+    	// res.end();
+    	getRecord(res, query);
+    } else {
+    	switch (req.url) {
         case '/getDevices':
             getDevices(res);
+            console.log('Started');
             break;
         case '/getRecords':
             getRecords(res);
             break;
+        case '/uplinkTest':
+            sendDownlink("test");
+            break;
+        case '/':
+            res.writeHead(302, {'Location': 'http://adamz.info'});
+			res.end();
+            
+            break;
     }
+    }
+    
     // setTimout(3 * 60 * 60 * 60 * 1000, fetch());
-}).listen(8080);
+}).listen(process.env.port || 8080);
 
 
 const getDevices = (res) => {
@@ -62,6 +81,19 @@ const getRecords = (res) => {
         res.end();
     });
 };
+const getRecord = (res, query) => {
+    sql = `SELECT * FROM record WHERE device_id = "${query}"`;
+    con.query(sql, function (err, result) {
+        if (err) throw err;
+        let myObj = JSON.parse(JSON.stringify(result));
+        let deviceArray = [];
+        for(let i = 0; i < myObj.length; i++){
+            deviceArray.push(myObj[i]);
+        }
+        res.write(JSON.stringify(deviceArray));
+        res.end();
+    });
+};
 
 const fetch = () => {
     const options = {
@@ -72,7 +104,7 @@ const fetch = () => {
     };
 
     con.connect(function(err) {
-        if (err) throw err;
+        if (err) {console.log('throwing error'); throw err};
         console.log("Connected!");
         request.get(options, function (error, response, body) {
             if (!error && response.statusCode === 200) {
@@ -93,4 +125,17 @@ const fetch = () => {
             }
         });
     });
+};
+
+const sendDownlink = (deviceId) => {
+	request.post('https://integrations.thethingsnetwork.org/ttn-eu/api/v2/down/gem/test?key=ttn-account-v2.VUaxxx7tf9lvtUph0nUcemiekjG2QouvhN9_HGKacKc', {
+		  json: {
+		    dev_id: deviceId,   
+			payload_raw: "AQIDBA==" 
+		  }
+	}, (error, res, body) => {
+		  if (error) {
+		    return
+		  }
+	});
 };
