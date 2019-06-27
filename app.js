@@ -9,7 +9,12 @@ const con = mysql.createConnection({
     password: "!d7NS`",
     database: "data"
 });
-var hour = 1000 * 60 * 60, the_interval = hour * 3;
+
+con.connect(function(err) {
+    if (err) throw err
+    
+});
+var hour = 1000 * 60 * 60, the_interval = hour / 60;
 setInterval(() => { fetch(); }, the_interval);
 
 http.createServer(function (req, res) {
@@ -97,33 +102,30 @@ const getRecord = (res, query) => {
 
 const fetch = () => {
     const options = {
-        url: 'https://gem.data.thethingsnetwork.org/api/v2/query?last=3h',
+        url: 'https://gem.data.thethingsnetwork.org/api/v2/query?last=60s',
         headers: {
             'Authorization': 'key ttn-account-v2.VUaxxx7tf9lvtUph0nUcemiekjG2QouvhN9_HGKacKc'
         }
     };
 
-    con.connect(function(err) {
-        if (err) {console.log('throwing error'); throw err};
-        console.log("Connected!");
-        request.get(options, function (error, response, body) {
-            if (!error && response.statusCode === 200) {
-                let myObj = JSON.parse(response.toJSON().body);
-                let height;
-                let deviceId;
-                let time;
-                for (let i = 0; i < myObj.length; i++) {
-                    height = myObj[i].receivedString;
-                    deviceId = myObj[i].device_id;
-                    time = myObj[i].time;
-                    let sql = `INSERT INTO record (device_id, height, date_received) VALUES ('${deviceId}', ${height}, '${time.slice(0, -8)}')`;
-                    con.query(sql, function (err, result) {
-                        if (err) throw err;
-                        console.log("1 record inserted");
-                    });
-                }
+    console.log("fetching!");
+    request.get(options, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            let myObj = JSON.parse(response.toJSON().body);
+            let height;
+            let deviceId;
+            let time;
+            for (let i = 0; i < myObj.length; i++) {
+                height = myObj[i].receivedString;
+                deviceId = myObj[i].device_id;
+                time = myObj[i].time;
+                let sql = `INSERT INTO record (device_id, height, date_received) VALUES ('${deviceId}', ${height}, '${time.slice(0, -8)}')`;
+                con.query(sql, function (err, result) {
+                    if (err) throw err;
+                    console.log("1 record inserted");
+                });
             }
-        });
+        }
     });
 };
 
@@ -135,7 +137,10 @@ const sendDownlink = (deviceId) => {
 		  }
 	}, (error, res, body) => {
 		  if (error) {
+		    console.error(error)
 		    return
 		  }
+		  console.log(`statusCode: ${res.statusCode}`)
+		  console.log(body)
 	});
 };
