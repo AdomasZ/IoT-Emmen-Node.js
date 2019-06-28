@@ -51,7 +51,6 @@ http.createServer(function (req, res) {
         case '/':
             res.writeHead(302, {'Location': 'http://adamz.info'});
 			res.end();
-            
             break;
     }
     }
@@ -64,10 +63,10 @@ const getDevices = (res) => {
     sql = `SELECT * FROM garbageBin`;
     con.query(sql, function (err, result) {
         if (err) throw err;
-        let myObj = JSON.parse(JSON.stringify(result));
+        let allDevices = JSON.parse(JSON.stringify(result));
         let deviceArray = [];
-        for(let i = 0; i < myObj.length; i++){
-            deviceArray.push(myObj[i]);
+        for(let i = 0; i < allDevices.length; i++){
+            deviceArray.push(allDevices[i]);
         }
         res.write(JSON.stringify(deviceArray));
         res.end();
@@ -77,12 +76,12 @@ const getRecords = (res) => {
     sql = `SELECT * FROM record`;
     con.query(sql, function (err, result) {
         if (err) throw err;
-        let myObj = JSON.parse(JSON.stringify(result));
-        let recordArray = [];
-        for(let i = 0; i < myObj.length; i++){
-            recordArray.push(myObj[i]);
+        let allRecords = JSON.parse(JSON.stringify(result));
+        let recordsToReturn = [];
+        for(let i = 0; i < allRecords.length; i++){
+            recordsToReturn.push(allRecords[i]);
         }
-        res.write(JSON.stringify(recordArray));
+        res.write(JSON.stringify(recordsToReturn));
         res.end();
     });
 };
@@ -90,12 +89,12 @@ const getRecord = (res, query) => {
     sql = `SELECT * FROM record WHERE device_id = "${query}"`;
     con.query(sql, function (err, result) {
         if (err) throw err;
-        let myObj = JSON.parse(JSON.stringify(result));
-        let deviceArray = [];
-        for(let i = 0; i < myObj.length; i++){
-            deviceArray.push(myObj[i]);
+        let allRecords = JSON.parse(JSON.stringify(result));
+        let recordsToReturn = [];
+        for(let i = 0; i < allRecords.length; i++){
+            recordsToReturn.push(allRecords[i]);
         }
-        res.write(JSON.stringify(deviceArray));
+        res.write(JSON.stringify(recordsToReturn));
         res.end();
     });
 };
