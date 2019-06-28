@@ -1,7 +1,9 @@
 const http = require('http');
 const mysql = require('mysql');
-const request = require('request')
+const request = require('request');
 let sql;
+
+// To do: Reduce code duplication
 
 const con = mysql.createConnection({
     host: "localhost",
@@ -14,6 +16,7 @@ con.connect(function(err) {
     if (err) throw err
     
 });
+
 var hour = 1000 * 60 * 60, the_interval = hour / 60;
 setInterval(() => { fetch(); }, the_interval);
 
@@ -33,26 +36,24 @@ http.createServer(function (req, res) {
     res.setHeader('Access-Control-Allow-Credentials', true);
     if(req.url.includes('?device_id=')){
     	let query = req.url.substr(req.url.indexOf('=')+1);
-    	// res.write(query);
-    	// res.end();
     	getRecord(res, query);
     } else {
     	switch (req.url) {
-        case '/getDevices':
-            getDevices(res);
-            console.log('Started');
-            break;
-        case '/getRecords':
-            getRecords(res);
-            break;
-        case '/uplinkTest':
-            sendDownlink("test");
-            break;
-        case '/':
-            res.writeHead(302, {'Location': 'http://adamz.info'});
-			res.end();
-            break;
-    }
+            case '/getDevices':
+                getDevices(res);
+                console.log('Started');
+                break;
+            case '/getRecords':
+                getRecords(res);
+                break;
+            case '/uplinkTest':
+                sendDownlink("test");
+                break;
+            case '/':
+                res.writeHead(302, {'Location': 'http://adamz.info'});
+                res.end();
+                break;
+        }
     }
     
     // setTimout(3 * 60 * 60 * 60 * 1000, fetch());
