@@ -78,11 +78,11 @@ const getRecords = (res) => {
     con.query(sql, function (err, result) {
         if (err) throw err;
         let myObj = JSON.parse(JSON.stringify(result));
-        let deviceArray = [];
+        let recordArray = [];
         for(let i = 0; i < myObj.length; i++){
-            deviceArray.push(myObj[i]);
+            recordArray.push(myObj[i]);
         }
-        res.write(JSON.stringify(deviceArray));
+        res.write(JSON.stringify(recordArray));
         res.end();
     });
 };
