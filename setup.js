@@ -4,13 +4,12 @@ let con = mysql.createConnection({
 	host: "localhost",
 	user: "root",
 	// password: "!d7NS`",
-	database: "data"
 });
 
 con.connect((err) => {
 	if (err) throw err;
 	console.log("Connected!");
-	let sql = "DROP DATABASE data";
+	let sql = "DROP DATABASE IF EXISTS data";
 	con.query(sql, function (err) {
 		if (err) throw err;
 		console.log("Database dropped.");

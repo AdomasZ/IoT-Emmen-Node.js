@@ -7,7 +7,7 @@ let sql;
 const con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "!d7NS`",
+    // password: "!d7NS`",
     database: "data"
 });
 
