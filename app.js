@@ -1,9 +1,8 @@
 const http = require('http');
 const mysql = require('mysql');
 const request = require('request');
-let sql;
 
-// To do: Reduce code duplication
+let sql;
 
 const con = mysql.createConnection({
     host: "localhost",
@@ -12,11 +11,10 @@ const con = mysql.createConnection({
     database: "data"
 });
 
-con.connect(function(err) {
-    if (err) throw err
-    
-});
-
+// con.connect(function(err) {
+//     if (err) throw err
+//
+// });
 var hour = 1000 * 60 * 60, the_interval = hour / 60;
 setInterval(() => { fetch(); }, the_interval);
 
@@ -36,38 +34,41 @@ http.createServer(function (req, res) {
     res.setHeader('Access-Control-Allow-Credentials', true);
     if(req.url.includes('?device_id=')){
     	let query = req.url.substr(req.url.indexOf('=')+1);
+    	// res.write(query);
+    	// res.end();
     	getRecord(res, query);
     } else {
     	switch (req.url) {
-            case '/getDevices':
-                getDevices(res);
-                console.log('Started');
-                break;
-            case '/getRecords':
-                getRecords(res);
-                break;
-            case '/uplinkTest':
-                sendDownlink("test");
-                break;
-            case '/':
-                res.writeHead(302, {'Location': 'http://adamz.info'});
-                res.end();
-                break;
-        }
+        case '/getDevices':
+            getDevices(res);
+            console.log('Started');
+            break;
+        case '/getRecords':
+            getRecords(res);
+            break;
+        case '/uplinkTest':
+            sendDownlink("test");
+            break;
+        case '/':
+            res.writeHead(302, {'Location': 'http://adamz.info'});
+			res.end();
+            
+            break;
+    }
     }
     
     // setTimout(3 * 60 * 60 * 60 * 1000, fetch());
-}).listen(process.env.port || 8080);
+}).listen(8080);
 
 
 const getDevices = (res) => {
     sql = `SELECT * FROM garbageBin`;
     con.query(sql, function (err, result) {
         if (err) throw err;
-        let allDevices = JSON.parse(JSON.stringify(result));
+        let myObj = JSON.parse(JSON.stringify(result));
         let deviceArray = [];
-        for(let i = 0; i < allDevices.length; i++){
-            deviceArray.push(allDevices[i]);
+        for(let i = 0; i < myObj.length; i++){
+            deviceArray.push(myObj[i]);
         }
         res.write(JSON.stringify(deviceArray));
         res.end();
@@ -77,12 +78,12 @@ const getRecords = (res) => {
     sql = `SELECT * FROM record`;
     con.query(sql, function (err, result) {
         if (err) throw err;
-        let allRecords = JSON.parse(JSON.stringify(result));
-        let recordsToReturn = [];
-        for(let i = 0; i < allRecords.length; i++){
-            recordsToReturn.push(allRecords[i]);
+        let myObj = JSON.parse(JSON.stringify(result));
+        let deviceArray = [];
+        for(let i = 0; i < myObj.length; i++){
+            deviceArray.push(myObj[i]);
         }
-        res.write(JSON.stringify(recordsToReturn));
+        res.write(JSON.stringify(deviceArray));
         res.end();
     });
 };
@@ -90,12 +91,12 @@ const getRecord = (res, query) => {
     sql = `SELECT * FROM record WHERE device_id = "${query}"`;
     con.query(sql, function (err, result) {
         if (err) throw err;
-        let allRecords = JSON.parse(JSON.stringify(result));
-        let recordsToReturn = [];
-        for(let i = 0; i < allRecords.length; i++){
-            recordsToReturn.push(allRecords[i]);
+        let myObj = JSON.parse(JSON.stringify(result));
+        let deviceArray = [];
+        for(let i = 0; i < myObj.length; i++){
+            deviceArray.push(myObj[i]);
         }
-        res.write(JSON.stringify(recordsToReturn));
+        res.write(JSON.stringify(deviceArray));
         res.end();
     });
 };
